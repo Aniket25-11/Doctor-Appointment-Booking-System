@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body{
+  background-color: rgba(0, 0, 0, 0.897);
+  color: white;
+}
 .active hr{
   @apply block
 }
