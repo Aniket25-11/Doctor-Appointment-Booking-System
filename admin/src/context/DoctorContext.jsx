@@ -1,14 +1,17 @@
-import { createContext } from "react";
+import React, { createContext } from "react";
 
-export const DoctorContext = createContext()
-const DoctorContextProvider = ({children})=>{
+export const DoctorContext = createContext();
+
+const DoctorContextProvider = ({ children }) => {
   const value = {
+    // Add context values here
+  };
 
-  }
   return (
     <DoctorContext.Provider value={value}>
-      {children}
+      {children} {/* Render children directly */}
     </DoctorContext.Provider>
-  )
-}
-export default DoctorContextProvider
+  );
+};
+
+export default DoctorContextProvider;
