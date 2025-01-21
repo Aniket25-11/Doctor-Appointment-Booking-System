@@ -19,6 +19,7 @@ const AdminContextProvider = ({ children }) => {
       );
       if (data.success) {
         setDoctors(data.doctors);
+        // console.log(data.doctors)
       } else {
         toast.error(error.message);
       }
@@ -37,12 +38,22 @@ const AdminContextProvider = ({ children }) => {
       );
       if (data.success) {
         toast.success(data.message);
-        getAllDoctors();
+        // getAllDoctors();
+        setDoctors((prevDoctors) => {
+          const updatedDoctors = prevDoctors.map((doctor) =>
+            doctor._id === doctorId
+              ? { ...doctor, available: !doctor.available }
+              : doctor
+          );
+          // console.log("Updated doctors:", updatedDoctors); // Check updated state
+          return updatedDoctors;
+        });
+        
       } else {
-        toast.error(error.message);
+        toast.error(data.message || "Failed to update availability.");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
       console.log(error);
     }
   };

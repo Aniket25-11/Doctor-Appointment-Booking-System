@@ -3,7 +3,7 @@ module.exports.changeAvailability = async(req,res) =>{
   try {
     const {doctorId} = req.body;
     const doctorData = await doctorModel.findById(doctorId)
-    await doctorModel.findByIdAndUpdate(doctorId,{availability:!doctorData.availability})
+    await doctorModel.findByIdAndUpdate(doctorId,{available:!doctorData.available})
     res.json({success:true,message:"Availability Change"})
   } catch (error) {
     console.log(error)
@@ -11,7 +11,7 @@ module.exports.changeAvailability = async(req,res) =>{
   }
 }
 
-module.exports.doctorList=async()=>{
+module.exports.doctorList=async(req,res)=>{
   try {
     const doctors = await doctorModel.find({}).select(['-password,-email'])
     res.json({success:true,doctors})
