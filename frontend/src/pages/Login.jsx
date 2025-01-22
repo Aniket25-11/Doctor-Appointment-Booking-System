@@ -41,13 +41,7 @@ const Login = () => {
   return (
     <>
       <form onSubmit={submitHandler} className="min-h-[80vh] flex items-center">
-        <label htmlFor="">Full Name</label>
-        <input type="text" placeholder="name" />
-        <label htmlFor="">Email</label>
-        <input type="email" />
-        <label htmlFor="">password</label>
-        <input type="password" />
-        <button type='submit'>login</button>
+        
       </form>
     </>
   );
