@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { v2: cloudinary } = require("cloudinary");
 const userModel = require("../models/user.model");
+const doctorModel = require("../models/doctor.model");
 module.exports.userRegister = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -99,3 +100,29 @@ module.exports.updateProfile = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+module.exports.bookAppointment = async(req,res) =>{
+  try {
+    const {userId,doctorId,slotTime,slotDate} = req.body
+    const doctorData = await doctorModel.findById(doctorId).select('-password')
+    if(!doctorData.available){
+      return res.json({success:false,message:"Doctor not available"})
+    }
+    let slotsBooked = doctorData.slot_booked
+    if(slotsBooked[slotDate]){
+      if(slotsBooked[slotDate].includes(slotTime)){
+        return res.json({success:false,message:"Slot not available"})
+      }else{
+        slotsBooked[slotDate].push(slotTime)
+      }
+    }else{
+      slotsBooked[slotDate]=[]
+      slotsBooked[slotDate].push(slotTime)
+    }
+    const userData = await userModel.findById(userId).select('-password')
+    delete doctorData.slot_booked
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+}
