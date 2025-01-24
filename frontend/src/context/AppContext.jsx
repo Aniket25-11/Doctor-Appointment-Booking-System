@@ -5,12 +5,11 @@ import { toast } from "react-toastify";
 export const AppContext = createContext();
 
 const AppContextProvider = ({ children }) => {
-
   const currencySymbol = "$";
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [doctors, setDoctors] = useState([]);
-  const [token,setToken] = useState('')
-  const [userData,setUserData] = useState(false)
+  const [token, setToken] = useState("");
+  const [userData, setUserData] = useState(false);
   const getDoctorsData = async () => {
     try {
       const { data } = await axios.post(backendUrl + "/api/doctor/list");
@@ -25,36 +24,42 @@ const AppContextProvider = ({ children }) => {
       console.log(error);
     }
   };
-  const loadUserProfileData = async()=>{
+  const loadUserProfileData = async () => {
     try {
-      const { data } = await axios.post(
-        backendUrl + "/api/user/get-profile",
-        { headers: { token } }
-      );
-      if(data.success){
-        setUserData(data.userData)
-      }else{
-        toast.error(data.message)
+      const { data } = await axios.post(backendUrl + "/api/user/get-profile", {
+        headers: { token },
+      });
+      if (data.success) {
+        setUserData(data.userData);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.message);
       console.log(error);
     }
-  }
+  };
   const value = {
     doctors,
-    currencySymbol,token,setToken,backendUrl,userData,setUserData,loadUserProfileData
+    getDoctorsData,
+    currencySymbol,
+    token,
+    setToken,
+    backendUrl,
+    userData,
+    setUserData,
+    loadUserProfileData,
   };
-  useEffect(()=>{
-    getDoctorsData()
-  },[])
-  useEffect(()=>{
-    if(token){
-      loadUserProfileData()
-    }else{
-      setUserData(false)
+  useEffect(() => {
+    getDoctorsData();
+  }, []);
+  useEffect(() => {
+    if (token) {
+      loadUserProfileData();
+    } else {
+      setUserData(false);
     }
-  },[token])
+  }, [token]);
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 

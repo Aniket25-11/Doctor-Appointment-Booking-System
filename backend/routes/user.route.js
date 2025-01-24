@@ -1,5 +1,5 @@
 const express = require('express')
-const { userRegister, userLogin, getProfile, updateProfile } = require('../controllers/user.controller')
+const { userRegister, userLogin, getProfile, updateProfile, bookAppointment } = require('../controllers/user.controller')
 const upload  = require('../middlewares/multer')
 const { authUser } = require('../middlewares/authUser')
 const userRoutes = express.Router()
@@ -7,4 +7,5 @@ userRoutes.post('/register',userRegister)
 userRoutes.post('/login',userLogin)
 userRoutes.get('/get-profile',authUser,getProfile)
 userRoutes.post('/update-profile',upload.single('image'),authUser,updateProfile)
+userRoutes.post('/book-appointment',authUser,bookAppointment)
 module.exports = userRoutes

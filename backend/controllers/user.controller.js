@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { v2: cloudinary } = require("cloudinary");
 const userModel = require("../models/user.model");
 const doctorModel = require("../models/doctor.model");
+const appointmentModel = require('../models/appointment.model')
 module.exports.userRegister = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -89,40 +90,54 @@ module.exports.updateProfile = async (req, res) => {
       const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
         resource_type: "image",
       });
-      const imageUrl = imageUpload.secure_url
+      const imageUrl = imageUpload.secure_url;
       await userModel.findByIdAndUpdate(userId, {
-       image:imageUrl
+        image: imageUrl,
       });
     }
-    res.json({success:true,message:"Profile Updated"})
+    res.json({ success: true, message: "Profile Updated" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
 
-module.exports.bookAppointment = async(req,res) =>{
+module.exports.bookAppointment = async (req, res) => {
   try {
-    const {userId,doctorId,slotTime,slotDate} = req.body
-    const doctorData = await doctorModel.findById(doctorId).select('-password')
-    if(!doctorData.available){
-      return res.json({success:false,message:"Doctor not available"})
+    const { userId, doctorId, slotTime, slotDate } = req.body;
+    const doctorData = await doctorModel.findById(doctorId).select("-password");
+    if (!doctorData.available) {
+      return res.json({ success: false, message: "Doctor not available" });
     }
-    let slotsBooked = doctorData.slot_booked
-    if(slotsBooked[slotDate]){
-      if(slotsBooked[slotDate].includes(slotTime)){
-        return res.json({success:false,message:"Slot not available"})
-      }else{
-        slotsBooked[slotDate].push(slotTime)
+    let slotsBooked = doctorData.slot_booked;
+    if (slotsBooked[slotDate]) {
+      if (slotsBooked[slotDate].includes(slotTime)) {
+        return res.json({ success: false, message: "Slot not available" });
+      } else {
+        slotsBooked[slotDate].push(slotTime);
       }
-    }else{
-      slotsBooked[slotDate]=[]
-      slotsBooked[slotDate].push(slotTime)
+    } else {
+      slotsBooked[slotDate] = [];
+      slotsBooked[slotDate].push(slotTime);
     }
-    const userData = await userModel.findById(userId).select('-password')
-    delete doctorData.slot_booked
+    const userData = await userModel.findById(userId).select("-password");
+    delete doctorData.slot_booked;
+    const appointmentData = {
+      userId,
+      doctorId,
+      userData,
+      doctorData,
+      amount: doctorData.fees,
+      slotTime,
+      slotDate,date:Date.now()
+
+    };
+    const newAppointment = new appointmentModel(appointmentData)
+    await newAppointment.save()
+    await doctorModel.findByIdAndUpdate(doctorId,{slots_booked})
+    res.json({success:true,message:"Appointment booked"})
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
-}
+};
