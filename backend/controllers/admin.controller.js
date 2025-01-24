@@ -1,8 +1,8 @@
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const { v2: cloudinary } = require("cloudinary");
-const doctorModel  = require('../models/doctor.model')
-const jwt = require('jsonwebtoken')
+const doctorModel = require("../models/doctor.model");
+const jwt = require("jsonwebtoken");
 
 //api for adding doctor
 module.exports.addDoctor = async (req, res, next) => {
@@ -25,7 +25,8 @@ module.exports.addDoctor = async (req, res, next) => {
       !email ||
       !password ||
       !experience ||
-      !about | !speciality ||
+      !about ||
+      !speciality ||
       !degree ||
       !fees ||
       !address
@@ -59,7 +60,6 @@ module.exports.addDoctor = async (req, res, next) => {
       password: hashedPassword,
       email,
       experience,
-      about,
       image: imageUrl,
       about,
       fees,
@@ -69,38 +69,40 @@ module.exports.addDoctor = async (req, res, next) => {
       date: Date.now(),
     };
 
-    const newDoctor  = new doctorModel(doctorData)
-    await newDoctor.save()
-    res.json({success:true,message:"Doctor added"})
+    const newDoctor = new doctorModel(doctorData);
+    await newDoctor.save();
+    res.json({ success: true, message: "Doctor added" });
   } catch (error) {
-    console.log(error)
-    res.json({success:false,message:error.message})
+    console.log(error);
+    res.json({ success: false, message: error.message });
   }
 };
 
-module.exports.adminLogin = async(req,res) =>{
+module.exports.adminLogin = async (req, res) => {
   try {
-    const {email,password} = req.body
-    if(email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD){
-      const token = jwt.sign(email+password ,process.env.JWT_SECRET)
-      res.json({success:true,token})
-    }else{
-      res.json({success:false,message:"Invalid credentials"})
+    const { email, password } = req.body;
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      const token = jwt.sign(email + password, process.env.JWT_SECRET);
+      res.json({ success: true, token });
+    } else {
+      res.json({ success: false, message: "Invalid credentials" });
     }
   } catch (error) {
-    console.log(error)
-    res.json({success:false,message:error.message})
+    console.log(error);
+    res.json({ success: false, message: error.message });
   }
-}
+};
 
 //api to get all doctor list for admin panel
-module.exports.allDoctors = async(req,res)=>{
+module.exports.allDoctors = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({}).select('-password')
-    res.json({success:true,doctors})
-
+    const doctors = await doctorModel.find({}).select("-password");
+    res.json({ success: true, doctors });
   } catch (error) {
-    console.log(error)
-    res.json({success:false,message:error.message})
+    console.log(error);
+    res.json({ success: false, message: error.message });
   }
-}
+};

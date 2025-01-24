@@ -211,6 +211,8 @@ export const doctors = [
         _id: 'doc9',
         name: 'Dr. Ava Mitchell',
         image: doc9,
+        // password:'avamit'
+        // email:"ava@mail.com"
         speciality: 'Dermatologist',
         degree: 'MBBS',
         experience: '1 Years',
@@ -239,6 +241,7 @@ export const doctors = [
         _id: 'doc11',
         name: 'Dr. Zoe Kelly',
         image: doc11,
+        // password : 'zoekel'
         speciality: 'Neurologist',
         degree: 'MBBS',
         experience: '4 Years',
@@ -268,7 +271,6 @@ export const doctors = [
         name: 'Dr. Chloe Evans',
         image: doc13,
         speciality: 'Gastroenterologist',
-        // speciality: '',
         degree: 'MBBS',
         experience: '4 Years',
         about: 'Dr. Davis has a strong commitment to delivering comprehensive medical care, focusing on preventive medicine, early diagnosis, and effective treatment strategies. Dr. Davis has a strong commitment to delivering comprehensive medical care, focusing on preventive medicine, early diagnosis, and effective treatment strategies.',

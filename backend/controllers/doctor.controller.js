@@ -13,8 +13,10 @@ module.exports.changeAvailability = async(req,res) =>{
 
 module.exports.doctorList=async(req,res)=>{
   try {
-    const doctors = await doctorModel.find({}).select(['-password,-email'])
+    const doctors = await doctorModel.find({}).select(['-password -email'])
+    console.log(doctors)
     res.json({success:true,doctors})
+
   } catch (error) {
     console.log(error)
     res.json({success:false,message:error.message})

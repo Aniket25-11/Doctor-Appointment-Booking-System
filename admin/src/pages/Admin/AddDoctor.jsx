@@ -35,13 +35,13 @@ const AddDoctor = () => {
       formData.append("experience", experience);
       formData.append("speciality", speciality);
       formData.append("about", about);
-      formData.append("degree", setDegree);
+      formData.append("degree", degree);
       formData.append(
         "address",
         JSON.stringify({ line1: address1, line2: address2 })
       );
 
-      //console log form data
+      // console log form data
       // formData.forEach((value, key) => {
       //   console.log(`${key}:${value}`);
       // });
@@ -204,7 +204,7 @@ const AddDoctor = () => {
               </select>
             </div>
             <div className="flex flex-1 flex-col gap-1">
-              <p className="mt-4 mb-2">Education</p>
+              <p className="mt-4 mb-2">Degree</p>
               <input
                 onChange={(e) => {
                   setDegree(e.target.value);
@@ -213,7 +213,7 @@ const AddDoctor = () => {
                 className="border rounded px-3 py-2"
                 type="text "
                 required
-                placeholder="Education"
+                placeholder="Degree"
               />
             </div>
             <div>
