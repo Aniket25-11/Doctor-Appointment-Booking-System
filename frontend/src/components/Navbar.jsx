@@ -60,7 +60,7 @@ const Navbar = () => {
                   My Appointments
                 </p>
                 <p onClick={logout} className="hover:text-black cursor-pointer">
-                  LogOut
+                  Logout
                 </p>
               </div>
             </div>
