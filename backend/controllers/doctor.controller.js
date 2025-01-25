@@ -14,7 +14,7 @@ module.exports.changeAvailability = async(req,res) =>{
 module.exports.doctorList=async(req,res)=>{
   try {
     const doctors = await doctorModel.find({}).select(['-password -email'])
-    console.log(doctors)
+    // console.log(doctors)
     res.json({success:true,doctors})
 
   } catch (error) {
