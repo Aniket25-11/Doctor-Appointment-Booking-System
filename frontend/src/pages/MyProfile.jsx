@@ -1,16 +1,15 @@
 import React, { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import { assets } from "../assets/assets.js";
+import { assets } from "../assets/assets.js"; // Make sure this path is correct
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const MyProfile = () => {
-  const { userData, setUserData, backendUrl, token, loadUserProfileData } =
-    useContext(AppContext);
+  const { userData, setUserData, backendUrl, token, loadUserProfileData } = useContext(AppContext);
   const [isEdit, setIsEdit] = useState(false);
   const [image, setImage] = useState(false);
-    const [loading, setLoading] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+
   const updateUserProfileData = async () => {
     try {
       setLoading(true); // Start loader
@@ -20,24 +19,22 @@ const MyProfile = () => {
       formData.append("address", JSON.stringify(userData.address));
       formData.append("gender", userData.gender);
       formData.append("dob", userData.dob);
-      image && formData.append("image", image);
-      const { data } = await axios.post(
-        backendUrl + "/api/user/update-profile",
-        formData,
-        { headers: { token } }
-      );
-      if(data.success){
-        toast.success(data.message)
-        await loadUserProfileData()
-        setImage(false)
-        setIsEdit(false)
-      }else{
-        toast.error(data.message)
+      if (image) formData.append("image", image);
+
+      const { data } = await axios.post(backendUrl + "/api/user/update-profile", formData, { headers: { token } });
+
+      if (data.success) {
+        toast.success(data.message);
+        await loadUserProfileData();
+        setImage(false);
+        setIsEdit(false);
+      } else {
+        toast.error(data.message);
       }
     } catch (error) {
-      console.log(error)
-      toast.error(error.message)
-    }finally {
+      console.log(error);
+      toast.error(error.message);
+    } finally {
       setLoading(false); // Stop loader
     }
   };
@@ -46,10 +43,11 @@ const MyProfile = () => {
     userData && (
       <div className="max-w-lg flex flex-col gap-2 text-sm">
         {loading && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-              <div className="w-12 h-12 border-4 border-t-blue-500 border-gray-300 rounded-full animate-spin"></div>
-            </div>
-          )}
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+            <div className="w-12 h-12 border-4 border-t-blue-500 border-gray-300 rounded-full animate-spin"></div>
+          </div>
+        )}
+
         {isEdit ? (
           <label htmlFor="image">
             <div className="inline-block relative cursor-pointer">
@@ -64,12 +62,7 @@ const MyProfile = () => {
                 alt=""
               />
             </div>
-            <input
-              onChange={(e) => setImage(e.target.files[0])}
-              type="file"
-              id="image"
-              hidden
-            />
+            <input onChange={(e) => setImage(e.target.files[0])} type="file" id="image" hidden />
           </label>
         ) : (
           <img className="w-36 rounded" src={userData.image} alt="" />
@@ -85,16 +78,12 @@ const MyProfile = () => {
             }
           />
         ) : (
-          <p className="font-medium text-2xl text-neutral-800 rounded mt-4">
-            {userData.name}
-          </p>
+          <p className="font-medium text-2xl text-neutral-800 rounded mt-4">{userData.name}</p>
         )}
 
         <hr className="bg-zinc-400 h-[1px] border-none w-[60%]" />
         <div>
-          <p className="text-neutral-500 underline my-4 font-semibold text-lg">
-            Contact Information
-          </p>
+          <p className="text-neutral-500 underline my-4 font-semibold text-lg">Contact Information</p>
           <div className="grid grid-cols-[1fr_3fr] gap-y-4 mt-3 text-neutral-700">
             <p className="font-medium">Email Id:</p>
             <p className="text-blue-500">{userData.email}</p>
@@ -147,10 +136,9 @@ const MyProfile = () => {
             )}
           </div>
         </div>
+
         <div>
-          <p className="text-neutral-500 underline font-semibold text-lg my-4">
-            Basic Information
-          </p>
+          <p className="text-neutral-500 underline font-semibold text-lg my-4">Basic Information</p>
           <div className="grid grid-cols-[1fr_3fr] gap-y-4 mt-3 text-neutral-700">
             <p className="font-medium">Gender:</p>
             {isEdit ? (
