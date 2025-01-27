@@ -65,7 +65,7 @@ const AdminContextProvider = ({ children }) => {
       });
       if (data.success) {
         setAppointments(data.appointments);
-        console.log("Appointments are ", data.appointments);
+        // console.log("Appointments are ", data.appointments);
       } else {
         toast.error(data.message);
       }
@@ -100,7 +100,7 @@ const AdminContextProvider = ({ children }) => {
       });
       if (data.success) {
         setDashData(data.dashData);
-        console.log(data.dashData)
+        // console.log(data.dashData)
       } else {
         toast.error(data.message);
       }

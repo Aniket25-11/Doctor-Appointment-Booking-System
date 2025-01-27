@@ -49,7 +49,7 @@ function Login() {
           toast.success("Login Successfully");
           localStorage.setItem("doctorToken", data.token);
           setDoctorToken(data.token);
-          console.log(data.token)
+          // console.log(data.token)
         } else {
           toast.error(data.message);
         }

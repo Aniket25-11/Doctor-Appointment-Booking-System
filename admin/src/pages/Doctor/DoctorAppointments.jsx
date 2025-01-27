@@ -14,7 +14,7 @@ function DoctorAppointments() {
     cancelAppointment,
   } = useContext(DoctorContext);
   const { currency, calculateAge, slotDateFormat } = useContext(AppContext);
-  console.log(appointments);
+  // console.log(appointments);
   useEffect(() => {
     if (doctorToken) {
       getAppointments();
