@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const { v2: cloudinary } = require("cloudinary");
 const doctorModel = require("../models/doctor.model");
 const jwt = require("jsonwebtoken");
+const appointmentModel = require("../models/appointment.model");
+const userModel = require("../models/user.model");
 
 //api for adding doctor
 module.exports.addDoctor = async (req, res, next) => {
@@ -106,3 +108,54 @@ module.exports.allDoctors = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+//api to get all appointment list
+module.exports.appointmentsAdmin = async(req,res) =>{
+  try {
+    const appointments = await appointmentModel.find({}).populate("userId")
+    .populate("doctorId");
+    res.json({success:true,appointments})
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+}
+
+//api for appointment cancelled
+module.exports.appointmentCancelled = async(req,res) =>{
+  try {
+    const {appointmentId} = req.body;
+    const appointmentData = await appointmentModel.find({appointmentId})
+    
+    await appointmentModel.findByIdAndUpdate(appointmentId,{cancelled:true})
+    //releasing doctor slot
+    const {doctorId,slotDate,slotTime} = appointmentData;
+    const doctorData = await doctorModel.findById(doctorId)
+    let slots_booked = doctorData.slots_booked
+    slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+    await doctorModel.findByIdAndUpdate(doctorId,{slots_booked:slots_booked})
+    res.json({success:true,message:"Appointment Cancelled"})
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+}
+
+//api to get dashboardPanel for admin
+module.exports.adminDashboard = async(req,res)=>{
+  try {
+    const doctors = await doctorModel.find({})
+    const users = await userModel.find({})
+    const appointments = await appointmentModel.find({})
+    const dashData = {
+      doctors:doctors.length,
+      appointments:appointments.length,
+      patients:users.length,
+      latestAppointment:appointments.reverse().slice(0,5)
+    }
+    res.json({success:true,dashData})
+  } catch (error) {
+    console.log(error)
+    res.json({success:false,message:error.message})
+  }
+}

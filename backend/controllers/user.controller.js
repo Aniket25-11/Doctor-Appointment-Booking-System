@@ -5,6 +5,8 @@ const { v2: cloudinary } = require("cloudinary");
 const userModel = require("../models/user.model");
 const doctorModel = require("../models/doctor.model");
 const appointmentModel = require("../models/appointment.model");
+const Razorpay = require('razorpay');
+
 module.exports.userRegister = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -104,27 +106,37 @@ module.exports.updateProfile = async (req, res) => {
 
 module.exports.bookAppointment = async (req, res) => {
   try {
-    const { userId, doctorId, slotTime, slotDate } = req.body;
-    const doctorData = await doctorModel.findById(doctorId).select("-password");
+    const { userId, docId, slotTime, slotDate } = req.body;
+    // console.log(docId)
+    // console.log(userId)
+    // console.log(slotTime)
+    // console.log(slotDate)
+    const doctorData = await doctorModel.findById(docId).select("-password");
+    // console.log(doctorData)
+    if (!doctorData) {
+      return res.status(404).json({ success: false, message: "Doctor not found" });
+    }
     if (!doctorData.available) {
       return res.json({ success: false, message: "Doctor not available" });
     }
-    let slotsBooked = doctorData.slot_booked;
-    if (slotsBooked[slotDate]) {
-      if (slotsBooked[slotDate].includes(slotTime)) {
+    let slots_booked = doctorData.slots_booked || {};
+    // console.log(slots_booked)
+    if (slots_booked[slotDate]) {
+      if (slots_booked[slotDate].includes(slotTime)) {
         return res.json({ success: false, message: "Slot not available" });
       } else {
-        slotsBooked[slotDate].push(slotTime);
+        slots_booked[slotDate].push(slotTime);
       }
     } else {
-      slotsBooked[slotDate] = [];
-      slotsBooked[slotDate].push(slotTime);
+      slots_booked[slotDate] = [];
+      slots_booked[slotDate].push(slotTime);
     }
     const userData = await userModel.findById(userId).select("-password");
-    delete doctorData.slot_booked;
+    // console.log(doctorData.slots_booked)
+    delete doctorData.slots_booked;
     const appointmentData = {
       userId,
-      doctorId,
+      doctorId:docId,
       userData,
       doctorData,
       amount: doctorData.fees,
@@ -134,7 +146,7 @@ module.exports.bookAppointment = async (req, res) => {
     };
     const newAppointment = new appointmentModel(appointmentData);
     await newAppointment.save();
-    await doctorModel.findByIdAndUpdate(doctorId, { slot_booked: slotsBooked });
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked: slots_booked });
     res.json({ success: true, message: "Appointment booked" });
   } catch (error) {
     console.log(error);
@@ -164,10 +176,56 @@ module.exports.cancelAppointment = async(req,res) =>{
     //releasing doctor slot
     const {doctorId,slotDate,slotTime} = appointmentData;
     const doctorData = await doctorModel.findById(doctorId)
-    let slotsBooked = doctorData.slot_booked
-    slotsBooked[slotDate] = slotsBooked[slotDate].filter(e => e !== slotTime)
-    await doctorModel.findByIdAndUpdate(doctorId,{slot_booked:slotsBooked})
+    let slots_booked = doctorData.slots_booked
+    slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
+    await doctorModel.findByIdAndUpdate(doctorId,{slots_booked:slots_booked})
     res.json({success:true,message:"Appointment Cancelled"})
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+}
+
+
+const razorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+module.exports.paymentRazorpay = async(req,res) =>{
+  try {
+    const {appointmentId} = req.body
+  const appointmentData = await appointmentModel.findById(appointmentId)
+  if(!appointmentData || appointmentData.cancelled){
+    return res.json({success:false,message:"Appointment cancelled or not found"})
+  }
+  //creating options for razorpay payment
+  const options = {
+    amount:appointmentData.amount * 100,
+    currency:process.env.CURRENCY,
+    reciept:appointmentId,
+  }
+  //creation of an order
+  const order = await razorpayInstance.orders.create(options)
+  res.json({success:true,order})
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+}
+
+//api to verify payment of razorpay
+module.exports.verifyRazorpay = async(req,res) =>{
+  try {
+    const {razorpay_order_id} = req.body
+    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
+    console.log(orderInfo)
+    // if(orderInfo.status === 'paid'){
+    //   await appointmentModel.findByIdAndUpdate(orderInfo.receipt,{payment:true})
+    //   res.json({success:true,message:"Payment Successfull"})
+    // }else{
+    //   res.json({success:false,message:"Something went wrong,Payment failed"})
+    // }
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

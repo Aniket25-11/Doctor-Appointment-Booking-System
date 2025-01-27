@@ -5,12 +5,14 @@ import { assets } from "../assets/assets.js";
 import { useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { DoctorContext } from "../context/DoctorContext.jsx";
 
 function Login() {
   const [state, setState] = useState("Admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { setAdminToken, backendUrl } = useContext(AdminContext);
+  const { doctorToken,setDoctorToken } = useContext(DoctorContext);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -25,7 +27,7 @@ function Login() {
           // console.log(data.token)
           localStorage.setItem("adminToken", data.token);
           setAdminToken(data.token);
-          toast.success('Login Successfully!🙂', {
+          toast.success("Login Successfully!🙂", {
             position: "top-right",
             autoClose: 5000,
             hideProgressBar: false,
@@ -34,11 +36,23 @@ function Login() {
             draggable: true,
             progress: undefined,
             theme: "light",
-            });
+          });
         } else {
           toast.error(data.message);
         }
       } else {
+        const { data } = await axios.post(backendUrl + "/api/doctor/login", {
+          email,
+          password,
+        });
+        if (data.success) {
+          toast.success("Login Successfully");
+          localStorage.setItem("doctorToken", data.token);
+          setDoctorToken(data.token);
+          console.log(data.token)
+        } else {
+          toast.error(data.message);
+        }
       }
     } catch (error) {}
   };
@@ -51,7 +65,7 @@ function Login() {
     >
       <div className="flex flex-col gap-3 m-auto items-start p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-[#5e5e5e] text-sm shadow-lg">
         <p className="text-2xl font-semibold m-auto">
-          <span className="text-primary"> {state} </span> Login{" "}
+          <span className="text-primary"> {state} </span> Login
         </p>
         <div className="w-full">
           <p>Email</p>
