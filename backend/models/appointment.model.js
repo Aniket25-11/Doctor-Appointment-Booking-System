@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
 const appointmentSchema = new mongoose.Schema({
-  userId:{
-    type:String,
-    required:true
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user", // Reference to User model
+    required: true,
   },
-  doctorId:{
-    type:String,
-    required:true
+  doctorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "doctor", // Reference to Doctor model
+    required: true,
   },
   slotDate:{
     type:String,

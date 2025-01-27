@@ -1,30 +1,38 @@
 import React from "react";
 import { useContext } from "react";
-import { AdminContext } from "../../context/AdminContext";
+import { DoctorContext } from "../../context/DoctorContext";
 import { useEffect } from "react";
 import { assets } from "../../assets/assets";
 import { AppContext } from "../../context/AppContext";
 
-const Dashboard = () => {
-  const { adminToken, dashData, getDashData, cancelAppointment } =
-    useContext(AdminContext);
-  const { slotDateFormat } = useContext(AppContext);
+function DoctorDashboard() {
+  const {
+    getDashData,
+    doctorToken,
+    dashData,
+    setDashData,
+    completeAppointment,
+    cancelAppointment,
+  } = useContext(DoctorContext);
+  const { slotDateFormat, currency } = useContext(AppContext);
+
   useEffect(() => {
-    if (adminToken) {
+    if (doctorToken) {
       getDashData();
     }
-  }, [adminToken]);
+  }, [doctorToken]);
   return (
     dashData && (
       <div className="m-5">
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center min-w-52 bg-white gap-2 rounded border-2 border-gray-200 cursor-pointer hover:scale-105 transition-all ">
-            <img className="w-14" src={assets.doctor_icon} alt="" />
+            <img className="w-14" src={assets.earning_icon} alt="" />
             <div>
               <p className="text-xl font-semibold text-gray-600">
-                {dashData.doctors}
+                {currency}
+                {dashData.earnings}
               </p>
-              <p className="text-gray-400">Doctors</p>
+              <p className="text-gray-400">Earnings</p>
             </div>
           </div>
           <div className="flex items-center min-w-52 bg-white gap-2 rounded border-2 border-gray-200 cursor-pointer hover:scale-105 transition-all ">
@@ -52,33 +60,43 @@ const Dashboard = () => {
             <p className="font-semibold">Latest Booking</p>
           </div>
           <div className="border border-t-0 pt-4">
-            {dashData.latestAppointment.map((latest, index) => (
+            {dashData.latestAppointments.map((latest, index) => (
               <div
                 className="flex items-center px-6 py-3 gap-3 hover:bg-gray-100"
                 key={index}
               >
                 <img
                   className="w-10 rounded-full"
-                  src={latest.doctorData.image}
+                  src={latest.userData.image}
                   alt=""
                 />
                 <div className="flex-1 text-sm">
                   <p className="text-gray-800 font-medium">
-                    {latest.doctorData.name}
+                    {latest.userData.name}
                   </p>
                   <p className="text-gray-600">
                     {slotDateFormat(latest.slotDate)}
                   </p>
                 </div>
                 {latest.cancelled ? (
-                  <p className="font-medium text-xs text-red-500">Cancelled</p>
+                  <p className="text-red-400 text-sm font-medium">Cancelled</p>
+                ) : latest.isCompleted ? (
+                  <p className="text-green-500 text-sm font-medium">
+                    Completed
+                  </p>
                 ) : (
-                  <img
-                    onClick={() => cancelAppointment(latest._id)}
-                    className="w-10 cursor-pointer"
-                    src={assets.cancel_icon}
-                    alt=""
-                  />
+                  <div className="flex">
+                    <img
+                      onClick={() => cancelAppointment(latest._id)}
+                      className="w-10 cursor-pointer"
+                      src={assets.cancel_icon}
+                    />
+                    <img
+                      onClick={() => completeAppointment(latest._id)}
+                      className="w-10 cursor-pointer"
+                      src={assets.tick_icon}
+                    />
+                  </div>
                 )}
               </div>
             ))}
@@ -87,6 +105,6 @@ const Dashboard = () => {
       </div>
     )
   );
-};
+}
 
-export default Dashboard;
+export default DoctorDashboard;
