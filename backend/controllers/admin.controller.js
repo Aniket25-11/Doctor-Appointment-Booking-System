@@ -125,7 +125,7 @@ module.exports.appointmentsAdmin = async(req,res) =>{
 module.exports.appointmentCancelled = async(req,res) =>{
   try {
     const {appointmentId} = req.body;
-    const appointmentData = await appointmentModel.find({appointmentId})
+    const appointmentData = await appointmentModel.findById(appointmentId)
     
     await appointmentModel.findByIdAndUpdate(appointmentId,{cancelled:true})
     //releasing doctor slot
@@ -133,8 +133,8 @@ module.exports.appointmentCancelled = async(req,res) =>{
     const doctorData = await doctorModel.findById(doctorId)
     let slots_booked = doctorData.slots_booked
     slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
-    await doctorModel.findByIdAndUpdate(doctorId,{slots_booked:slots_booked})
-    res.json({success:true,message:"Appointment Cancelled"})
+    await doctorModel.findByIdAndUpdate(doctorId,{slots_booked})
+    return res.json({success:true,message:"Appointment Cancelled"})
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

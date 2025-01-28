@@ -5,7 +5,7 @@ const { v2: cloudinary } = require("cloudinary");
 const userModel = require("../models/user.model");
 const doctorModel = require("../models/doctor.model");
 const appointmentModel = require("../models/appointment.model");
-const Razorpay = require('razorpay');
+const Razorpay = require("razorpay");
 
 module.exports.userRegister = async (req, res) => {
   try {
@@ -114,7 +114,9 @@ module.exports.bookAppointment = async (req, res) => {
     const doctorData = await doctorModel.findById(docId).select("-password");
     // console.log(doctorData)
     if (!doctorData) {
-      return res.status(404).json({ success: false, message: "Doctor not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Doctor not found" });
     }
     if (!doctorData.available) {
       return res.json({ success: false, message: "Doctor not available" });
@@ -136,7 +138,7 @@ module.exports.bookAppointment = async (req, res) => {
     delete doctorData.slots_booked;
     const appointmentData = {
       userId,
-      doctorId:docId,
+      doctorId: docId,
       userData,
       doctorData,
       amount: doctorData.fees,
@@ -154,80 +156,87 @@ module.exports.bookAppointment = async (req, res) => {
   }
 };
 
-module.exports.listAppointment = async (req,res) =>{
+module.exports.listAppointment = async (req, res) => {
   try {
-    const {userId} = req.body;
-    const appointments = await appointmentModel.find({userId})
-    res.json({success:true,appointments}) 
+    const { userId } = req.body;
+    const appointments = await appointmentModel.find({ userId });
+    // console.log(appointments)
+    res.json({ success: true, appointments });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
-}
+};
 
-module.exports.cancelAppointment = async(req,res) =>{
+module.exports.cancelAppointment = async (req, res) => {
   try {
-    const {userId,appointmentId} = req.body;
-    const appointmentData = await appointmentModel.find({appointmentId})
-    if(appointmentData.userId !== userId){
-      res.json({success:false,message:"Unauthorised Access"})
+    const { userId, appointmentId } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
+    if (appointmentData.userId.toString() !== userId) {
+      return res.json({ success: false, message: "Unauthorised Access" });
     }
-    await appointmentModel.findByIdAndUpdate(appointmentId,{cancelled:true})
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      cancelled: true,
+    });
     //releasing doctor slot
-    const {doctorId,slotDate,slotTime} = appointmentData;
-    const doctorData = await doctorModel.findById(doctorId)
-    let slots_booked = doctorData.slots_booked
-    slots_booked[slotDate] = slots_booked[slotDate].filter(e => e !== slotTime)
-    await doctorModel.findByIdAndUpdate(doctorId,{slots_booked:slots_booked})
-    res.json({success:true,message:"Appointment Cancelled"})
+    const { doctorId, slotDate, slotTime } = appointmentData;
+    const doctorData = await doctorModel.findById(doctorId);
+    let slots_booked = doctorData.slots_booked;
+    slots_booked[slotDate] = slots_booked[slotDate].filter(
+      (e) => e !== slotTime
+    );
+    await doctorModel.findByIdAndUpdate(doctorId, { slots_booked });
+    return res.json({ success: true, message: "Appointment Cancelled" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
-}
-
+};
 
 const razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-module.exports.paymentRazorpay = async(req,res) =>{
+module.exports.paymentRazorpay = async (req, res) => {
   try {
-    const {appointmentId} = req.body
-  const appointmentData = await appointmentModel.findById(appointmentId)
-  if(!appointmentData || appointmentData.cancelled){
-    return res.json({success:false,message:"Appointment cancelled or not found"})
-  }
-  //creating options for razorpay payment
-  const options = {
-    amount:appointmentData.amount * 100,
-    currency:process.env.CURRENCY,
-    reciept:appointmentId,
-  }
-  //creation of an order
-  const order = await razorpayInstance.orders.create(options)
-  res.json({success:true,order})
+    const { appointmentId } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
+    if (!appointmentData || appointmentData.cancelled) {
+      return res.json({
+        success: false,
+        message: "Appointment cancelled or not found",
+      });
+    }
+    //creating options for razorpay payment
+    const options = {
+      amount: appointmentData.amount * 100,
+      currency: process.env.CURRENCY,
+      receipt: appointmentId,
+    };
+    //creation of an order
+    const order = await razorpayInstance.orders.create(options);
+    res.json({ success: true, order });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
-}
+};
 
 //api to verify payment of razorpay
-module.exports.verifyRazorpay = async(req,res) =>{
+module.exports.verifyRazorpay = async (req, res) => {
   try {
-    const {razorpay_order_id} = req.body
-    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id)
-    console.log(orderInfo)
-    // if(orderInfo.status === 'paid'){
-    //   await appointmentModel.findByIdAndUpdate(orderInfo.receipt,{payment:true})
-    //   res.json({success:true,message:"Payment Successfull"})
-    // }else{
-    //   res.json({success:false,message:"Something went wrong,Payment failed"})
-    // }
+    const { razorpay_order_id } = req.body;
+    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+    // console.log(orderInfo);
+    if(orderInfo.status === 'paid'){
+      await appointmentModel.findByIdAndUpdate(orderInfo.receipt,{payment:true})
+       return res.json({success:true,message:"Payment Successfull"})
+    }else{
+      return res.json({success:false,message:"Something went wrong,Payment failed"})
+    }
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
-}
+};

@@ -64,7 +64,7 @@ const AdminContextProvider = ({ children }) => {
         headers: { adminToken },
       });
       if (data.success) {
-        setAppointments(data.appointments);
+        setAppointments(data.appointments.reverse());
         // console.log("Appointments are ", data.appointments);
       } else {
         toast.error(data.message);
@@ -77,7 +77,7 @@ const AdminContextProvider = ({ children }) => {
 
   const cancelAppointment = async (appointmentId) => {
     try {
-      const { data } = await axios(
+      const { data } = await axios.post(
         backendUrl + "/api/admin/cancel-appointment",
         { appointmentId },
         { headers: { adminToken } }

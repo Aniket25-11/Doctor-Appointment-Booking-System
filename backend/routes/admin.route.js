@@ -9,6 +9,6 @@ adminRoutes.post('/login',adminLogin)
 adminRoutes.post('/all-doctors',authAdmin,allDoctors)
 adminRoutes.post('/change-availability',authAdmin,changeAvailability)
 adminRoutes.get('/appointments',authAdmin,appointmentsAdmin)
-adminRoutes.post('cancel-appointment',authAdmin,appointmentCancelled)
+adminRoutes.post('/cancel-appointment',authAdmin,appointmentCancelled)
 adminRoutes.get('/dashboard',authAdmin,adminDashboard)
 module.exports = adminRoutes

@@ -11,5 +11,5 @@ userRoutes.post('/book-appointment',authUser,bookAppointment)
 userRoutes.get('/appointments',authUser,listAppointment)
 userRoutes.post('/cancel-appointment',authUser,cancelAppointment)
 userRoutes.post('/payment-razorpay',authUser,paymentRazorpay)
-userRoutes.post('verifyRazorpay',authUser,verifyRazorpay)
+userRoutes.post('/verifyRazorpay',authUser,verifyRazorpay)
 module.exports = userRoutes

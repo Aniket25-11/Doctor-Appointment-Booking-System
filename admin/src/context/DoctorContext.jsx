@@ -23,11 +23,11 @@ const DoctorContextProvider = ({ children }) => {
           headers: { doctorToken },
         }
       );
-      console.log(data);
+      // console.log(data);
       if (data.success) {
         const appointments = Array.isArray(data.message) ? data.message : [];
         setAppointments(appointments.reverse());
-        console.log(appointments.reverse());
+        // console.log(appointments.reverse());
       } else {
         toast.error(data.message);
       }
