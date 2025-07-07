@@ -22,7 +22,7 @@ const port = process.env.PORT || 3000;
 
 
 app.get("/", (req, res) => {
-  res.send("hello meri jaan");
+  res.send("Backend Started .....");
 });
 
 app.use('/api/doctor', doctorRoutes);
