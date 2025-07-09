@@ -13,7 +13,8 @@ const userRoutes = require("./routes/user.route");
 
 connectDB();
 connectCloudinary();
-app.use(cors());
+
+app.use(cors({origin:"https://doctor-appointment-booking-system-8-one.vercel.app/", credentials:true}))
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 // app.use(cookieParser());
